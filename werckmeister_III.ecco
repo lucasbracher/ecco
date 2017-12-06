@@ -1,0 +1,12 @@
+Bb is 440 hertz;
+F is 1 perfect fifth above Bb minus 1/4 of syntonic comma;
+C is 1 perfect fifth above F minus 1/4 of syntonic comma;
+G is 1 perfect fifth above C minus 1/4 of syntonic comma;
+D is 1 perfect fifth above G minus 1/4 of syntonic comma;
+A is 1 perfect fifth above D minus 1/4 of syntonic comma;
+E is 1 perfect fifth above A minus 1/4 of syntonic comma;
+B is 1 perfect fifth above E minus 1/4 of syntonic comma;
+F# is 1 perfect fifth above B minus 1/4 of syntonic comma;
+C# is 1 perfect fifth above F# minus 1/4 of syntonic comma;
+G# is 1 perfect fifth above C# minus 1/4 of syntonic comma;
+Eb is 1 perfect fifth above G# plus 5/7 of syntonic comma;

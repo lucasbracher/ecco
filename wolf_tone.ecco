@@ -1,0 +1,3 @@
+drop;
+load quarter_comma_meantone.ecco;
+play Eb G#;
