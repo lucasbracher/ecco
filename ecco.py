@@ -14,8 +14,8 @@ from tabulate import tabulate
 import time
 
 from pyo import *
-#s = Server(nchnls=1, audio='jack').boot()
-s = Server(nchnls=1, audio='pulseaudio').boot()
+s = Server(nchnls=1, audio='jack').boot()
+#s = Server(nchnls=1, audio='pulseaudio').boot()
 s.start()
 
 class Lexer(object):
@@ -120,13 +120,14 @@ class Parser(object):
 				f = freq / (2 ** floor(self.log2( freq / self.freqprim() )))
 				c = self.log2( f / self.freqprim() ) * 1200
 				self.d[nota] = [f, c]
+
 	def dev_cent(self, cent):
 		getcontext().prec = 3
-		fl = Decimal(floor(cent/100) * 100)
-		ce = Decimal(ceil(cent/100) * 100)
-		print("%f cents, %f floor, %f ceil" % (cent, fl, ce))
-		if cent == 0 or cent-fl == Decimal(0):
-			return 0
+		fl = floor(cent/100) * 100
+		ce = ceil(cent/100) * 100
+		#print("%f cents, %f floor, %f ceil" % (cent, fl, ce))
+		if abs(cent) < 1e-5 or abs(cent-fl) < 1e-5:
+			return 0.0
 		else:
 			if (cent - fl) < (ce - cent):
 				return cent-fl
@@ -138,11 +139,9 @@ class Parser(object):
 		if self.imprime:
 			data = []
 			for k, v in sorted(self.d.items(), key=lambda x : x[1][1]):
-				#data.append([k, v[0], v[1], self.dev_cent(v[1])])
-				data.append([k, v[0], v[1]])
+				data.append([k, v[0], v[1], self.dev_cent(v[1])])
 			#print(data)
-			#print(tabulate(data, headers=["Note","Hertz", "Cents", "Deviation"]))
-			print(tabulate(data, headers=["Note", "Hertz", "Cents"]))
+			print(tabulate(data, headers=["Note","Hertz", "Cents", "Deviation"]))
 
 
 
@@ -231,7 +230,7 @@ class Parser(object):
 
 	def p_definitions11(self, p):
 		"definition : GENERATE END_STMT"
-		for k, v in self.d.iteritems():
+		for k, v in self.d.items():
 			#daniweb 263775
 			self.make_soundfile(v[0], 11025, k)
 
@@ -239,7 +238,7 @@ class Parser(object):
 		"definition : NOTE IS BASE END_STMT"
 		#self.freqprim = self.d[p[1]][0]
 		dif_cents = self.d[p[1]][1]
-		for k, v in self.d.iteritems():
+		for k, v in self.d.items():
 			#to com preguica de pensar, refatorar depois
 			self.d[k] = [self.d[k][0], self.d[k][1] - dif_cents]
 			if self.d[k][1] < 0:
@@ -252,7 +251,8 @@ class Parser(object):
 	def p_definitions13(self, p):
 		"""definition : TRANSPOSE INTEGER CENT UPDOWN END_STMT
 		            |   TRANSPOSE FLOAT CENT UPDOWN END_STMT"""
-		for k, v in self.d.iteritems():
+		#print(type(self.d))
+		for k, v in self.d.items():
 			self.d[k] = [self.d[k][0] * (2 ** (self.parse_cents(p[2], p[4])/1200)), self.d[k][1]]
 			#if self.d[k][1] == 0.0:
 			#	self.freqprim = self.d[k][0]
@@ -262,7 +262,7 @@ class Parser(object):
 		"""definition : TRANSPOSE NOTE TO INTEGER HERTZ END_STMT
 		            |   TRANSPOSE NOTE TO FLOAT HERTZ END_STMT"""
 		const = p[4] / self.d[p[2]][0]
-		for k, v in self.d.iteritems():
+		for k, v in self.d.items():
 			self.d[k] = [self.d[k][0] * const, self.d[k][1]]
 			#if self.d[k][1] == 0.0:
 				#self.freqprim = self.d[k][0]
