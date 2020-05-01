@@ -12,7 +12,7 @@ from ply.yacc import yacc
 from tabulate import tabulate
 
 import re
-import readline
+import pyreadline
 import string
 import sys
 import time
