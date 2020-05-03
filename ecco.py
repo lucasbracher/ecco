@@ -12,7 +12,11 @@ from ply.yacc import yacc
 from tabulate import tabulate
 
 import re
-import pyreadline
+import platform
+if platform.system() == 'Windows':
+    import pyreadline
+else:
+    import readline
 import string
 import sys
 import time
@@ -26,7 +30,7 @@ s.start()
 class Lexer(object):
     tokens = [ 'NOTE', 'IS', 'OF', 'FLOAT', 'FRACTION', 'INTEGER', 'HERTZ', 
         'INTERVAL_NUMBER', 'INTERVAL_QUALITY', 'ABOVEBELOW', 'PLUSMINUS', 
-        'COMMA_TYPE', 'COMMA', 'BPS', 'CENT', 'DROP', 'COMPARE', 
+        'COMMA_TYPE', 'COMMA', 'CENT', 'DROP', 'COMPARE', 
         'GENERATE', 'BASE', 'TRANSPOSE', 'UPDOWN', 'PLAY', 'TO', 'RPAREN',
         'LPAREN', 'LOAD', 'SAVE', 'FILENAME', 'PRINT', 'ON', 'OFF', 'END_STMT' ]
 
@@ -56,7 +60,7 @@ class Lexer(object):
     t_PLUSMINUS        = r'\b(plus|minus)\b'
     t_COMMA_TYPE       = r'\b(syntonic|pythagorean)\b'
     t_COMMA            = r'\bcommas?\b'
-    t_BPS              = r'\bbps\b'
+    #t_BPS              = r'\bbps\b' # In a furure version
     t_CENT             = r'\bcents?\b'
     t_DROP             = r'\bdrop\b'
     t_COMPARE          = r'\bcompare\b'
@@ -66,14 +70,13 @@ class Lexer(object):
     t_UPDOWN           = r'\b(up|down)\b'
     t_PLAY             = r'\bplay\b'
     t_TO               = r'\bto\b'
-    #t_RPAREN           = r'\b\)\b'
-    #t_LPAREN           = r'\b\(\b'
+    #t_RPAREN           = r'\b\)\b' # In a future version
+    #t_LPAREN           = r'\b\(\b' # In a future version
     t_RPAREN           = r'\)'
     t_LPAREN           = r'\('    
     t_LOAD             = r'\bload\b'
     t_SAVE             = r'\bsave\b'
     t_FILENAME         = r'(\S+)+\.ecco'
-    #t_FILENAME         = r'[_0-9A-Za-z]+\.ecco'
     t_PRINT            = r'\bprint\b'
     t_ON               = r'\bon\b'
     t_OFF              = r'\boff\b'
@@ -190,9 +193,9 @@ class Parser():
         self.insere(p[1], p[3])
         self.lista()
 
-    def p_definitions2(self, p): #define note by other note and beats per second
-        """definition : NOTE IS NOTE PLUSMINUS INTEGER BPS END_STMT
-                    |   NOTE IS NOTE PLUSMINUS FLOAT BPS END_STMT"""
+    def p_definitions2(self, p): #define note by other note and hertz deviation
+        """definition : NOTE IS NOTE PLUSMINUS INTEGER HERTZ END_STMT
+                    |   NOTE IS NOTE PLUSMINUS FLOAT HERTZ END_STMT"""
         self.insere(p[1], self.d[p[3]][0] + self.parse_plusminus(p[4], p[5]))
         self.lista()
 
@@ -218,8 +221,9 @@ class Parser():
         self.insere(p[1], self.d[p[7]][0] * (self.parse_interval(p[4], p[5], p[6]) ** p[3]))
         self.lista()
 
-    def p_definitions7(self, p): #define note by pure interval and beats per second
-        "definition : NOTE IS INTEGER INTERVAL_QUALITY INTERVAL_NUMBER ABOVEBELOW NOTE PLUSMINUS INTEGER BPS END_STMT"
+    def p_definitions7(self, p): #define note by pure interval and hertz deviation
+        """definition : NOTE IS INTEGER INTERVAL_QUALITY INTERVAL_NUMBER ABOVEBELOW NOTE PLUSMINUS INTEGER HERTZ END_STMT
+                    |   NOTE IS INTEGER INTERVAL_QUALITY INTERVAL_NUMBER ABOVEBELOW NOTE PLUSMINUS FLOAT HERTZ END_STMT"""
         self.insere(p[1], (self.d[p[7]][0] * (self.parse_interval(p[4], p[5], p[6]) ** p[3])) + self.parse_plusminus(p[8], p[9]))
         self.lista()
 
